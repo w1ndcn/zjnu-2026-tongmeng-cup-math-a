@@ -1,0 +1,4 @@
+period,TTT_s,TTT_h,edges_high_vc
+morning,332421.1,92.34,0
+noon,173989.0,48.33,0
+evening,135318.3,37.59,0
