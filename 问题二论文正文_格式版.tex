@@ -1,0 +1,222 @@
+% !TEX program = xelatex
+% A题论文正文 — 问题二部分（按“同梦杯”论文格式整理）
+\documentclass[UTF8,zihao=-4,a4paper]{ctexart}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\linespread{1.0}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setlist{nosep,leftmargin=2em}
+\pagestyle{plain}
+
+\ctexset{
+  section={
+    format=\centering\heiti\zihao{4},
+    name={,、},
+    number=\chinese{section},
+    aftername=\quad,
+    beforeskip=1.0ex,
+    afterskip=1.0ex
+  },
+  subsection={
+    format=\raggedright\heiti\zihao{-4},
+    name={,},
+    number=\chinese{section}.\arabic{subsection},
+    aftername=\quad,
+    beforeskip=0.8ex,
+    afterskip=0.6ex
+  },
+  subsubsection={
+    format=\raggedright\heiti\zihao{-4},
+    name={,},
+    number=\chinese{section}.\arabic{subsection}.\arabic{subsubsection},
+    aftername=\quad,
+    beforeskip=0.6ex,
+    afterskip=0.4ex
+  }
+}
+
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{document}
+
+\begin{center}
+{\heiti\zihao{3} 基于静态停车容量与动态道路约束的校园电动车承载力评估模型}
+\end{center}
+
+\section{问题重述}
+
+随着校园内电动车数量持续增长，教学楼、宿舍区、食堂和商业街周边出现了停车空间紧张、局部乱停放和人车通行干扰等问题。问题二要求在保障校园道路通行顺畅且绝对不占用消防通道的前提下，结合道路长宽和建筑周边有效停车面积，建立校园电动车环境承载力评估模型，测算校园最多能够安全容纳的电动车规模，并为学校后续总量控制、分区管理和停车治理提供依据。
+
+本问的核心不只是估算“能画出多少车位”，而是要同时考虑停车空间、道路运行能力和消防安全边界。若只按地图可见空地面积计算，会高估实际可用车位；若只看道路通行能力，又无法反映教学楼、食堂和宿舍区周边的停放瓶颈。因此，本文采用“静态停车容量—动态道路容量—安全折减校核”的综合评估思路，得到校园电动车安全环境承载力。
+
+\section{问题分析}
+
+\subsection{问题二的分析}
+
+电动车环境承载力受两类约束共同影响。第一类是静态停车空间约束，即建筑周边在扣除消防通道、建筑出入口、人行通道和必要疏散空间后，能够用于规范停放电动车的有效面积。第二类是动态道路运行约束，即高峰期道路能够承受的电动车通行规模。当某一区域停车空间充足但道路接入能力不足时，道路成为瓶颈；当道路容量充足但建筑周边可停放面积有限时，停车空间成为瓶颈。
+
+因此，本文将校园划分为若干功能区，包括16号楼教学区、25号楼教学区、桃园生活区、杏园生活区、桂苑生活区、东区新教学楼、西区新教学楼和商业街。对每个区域分别计算静态容量和动态容量，并取二者较小值作为该区域的安全承载力。进一步地，考虑到题目明确要求“绝对不占用消防通道”，本文对原始候选停车面积引入安全折减系数，将地图上可识别的候选空间转化为真正可用于停放的有效面积。
+
+\section{模型假设}
+
+为保证模型可计算且结果具有管理解释性，作如下假设：
+\begin{enumerate}
+    \item 电动车停放只允许发生在建筑周边可规划区域内，不占用消防通道、建筑出入口、主通行人行道和绿化隔离带；
+    \item 每辆两轮电动车的基本占地面积取 $a_e=1.08\,\text{m}^2$，并通过停车间距和通道系数 $\beta$ 反映实际规范停放所需附加空间；
+    \item 各区域停车面积在短期内不发生结构性变化，安全折减系数可反映消防通道、疏散空间和不可停车空间的综合影响；
+    \item 动态道路容量由区域周边可接入道路的通行能力决定，并与问题一中得到的路网容量和高峰运行状态保持一致；
+    \item 校园电动车治理应同时区分高峰运行需求和车辆实际保有量，前者用于高峰运行校核，后者用于存量总量管理校核。
+\end{enumerate}
+
+\section{符号说明}
+
+\begin{table}[H]
+\centering
+\caption{问题二主要符号说明}
+\label{tab:symbols_q2}
+\begin{tabular}{ccc}
+\toprule
+\textbf{符号} & \textbf{说明} & \textbf{单位} \\
+\midrule
+$A_i^{raw}$ & 区域 $i$ 原始候选停车面积 & $\text{m}^2$ \\
+$\lambda_i$ & 区域 $i$ 的消防安全折减系数 & -- \\
+$A_i^{eff}$ & 区域 $i$ 有效停车面积 & $\text{m}^2$ \\
+$a_e$ & 单辆电动车基本占地面积 & $\text{m}^2$/辆 \\
+$\beta$ & 规范停放附加空间系数 & -- \\
+$N_i^{static}$ & 区域 $i$ 静态停车容量 & 辆 \\
+$N_i^{dynamic}$ & 区域 $i$ 动态道路容量 & 辆 \\
+$N_i^*$ & 区域 $i$ 最终安全承载力 & 辆 \\
+$N_{max}$ & 全校电动车安全环境承载力 & 辆 \\
+$D_i^{peak}$ & 区域 $i$ 高峰停车或运行需求 & 辆 \\
+$\rho_i$ & 区域 $i$ 饱和度 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{模型的建立与求解}
+
+\subsection{问题二模型的建立与求解}
+
+\subsubsection{静态停车容量模型}
+
+首先根据校园地图和建筑周边空间，估计各功能区原始候选停车面积 $A_i^{raw}$。但原始候选面积不能全部用于停车，需要扣除消防通道、建筑出入口、主通行人行道、绿化隔离带和必要疏散空间。为此，引入区域安全折减系数 $\lambda_i$，得到有效停车面积：
+\begin{equation}
+A_i^{eff}=\lambda_i A_i^{raw}.
+\end{equation}
+其中，$0<\lambda_i<1$。生活区和商业街人流密度较高、消防疏散要求更严格，折减系数相对较小；教学区周边若有较明确的开敞空间，折减系数可略高。
+
+设单辆电动车基本占地面积为 $a_e$，规范停放附加空间系数为 $\beta$，则区域 $i$ 的静态停车容量为
+\begin{equation}
+N_i^{static}=\left\lfloor \frac{A_i^{eff}}{\beta a_e}\right\rfloor .
+\end{equation}
+该公式表示：在满足通道、间距和规范停放要求后，区域能够安全容纳的最大电动车数量。本文采用 $a_e=1.08\,\text{m}^2$，并通过 $\beta$ 将停车间隔、通行缝隙和管理冗余计入容量测算。
+
+\begin{table}[H]
+\centering
+\caption{消防安全折减后的静态容量测算结果}
+\label{tab:static_capacity}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{区域} & \textbf{原始面积/m$^2$} & \textbf{折减系数} & \textbf{有效面积/m$^2$} & \textbf{静态容量/辆} \\
+\midrule
+16号楼教学区 & 450 & 0.65 & 292 & 200 \\
+25号楼教学区 & 550 & 0.65 & 358 & 245 \\
+桃园生活区 & 8160 & 0.50 & 4080 & 2798 \\
+杏园生活区 & 5100 & 0.55 & 2805 & 1923 \\
+桂苑生活区 & 7700 & 0.50 & 3850 & 2640 \\
+东区新教学楼 & 2200 & 0.60 & 1320 & 905 \\
+西区新教学楼 & 4000 & 0.60 & 2400 & 1646 \\
+商业街 & 300 & 0.50 & 150 & 102 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{动态道路容量模型}
+
+静态停车容量只能反映“能否停得下”，还需要进一步判断高峰期道路是否能够承受相应的电动车运行规模。若某一区域周边道路通行能力不足，即使停车面积较大，也会在出入口和邻近主干道形成拥堵。因此，本文根据区域周边接入道路的可用通行能力，构建动态道路容量 $N_i^{dynamic}$。
+
+设区域 $i$ 的接入路段集合为 $E_i$，路段 $e$ 的通行能力为 $C_e$，可分配给电动车的比例为 $\eta_b$，高峰持续时间为 $T_h$，则动态道路容量可表示为
+\begin{equation}
+N_i^{dynamic}=\sum_{e\in E_i}\eta_b C_e T_h.
+\end{equation}
+实际计算中，该容量与问题一中路网通行能力、路段宽度和高峰运行状态相衔接，用于判断区域周边道路是否成为电动车承载力瓶颈。
+
+\subsubsection{综合承载力模型}
+
+区域最终承载力由静态停车容量和动态道路容量共同约束，取二者较小值：
+\begin{equation}
+N_i^*=\min\left(N_i^{static},N_i^{dynamic}\right).
+\end{equation}
+全校电动车安全环境承载力为各区域承载力之和：
+\begin{equation}
+N_{max}=\sum_i N_i^*.
+\end{equation}
+区域饱和度定义为
+\begin{equation}
+\rho_i=\frac{D_i^{peak}}{N_i^*},
+\end{equation}
+其中 $D_i^{peak}$ 为区域高峰需求。当 $\rho_i>1$ 时，说明该区域已经超过安全承载力；当 $\rho_i$ 接近1时，说明区域处于接近饱和状态；当 $\rho_i<1$ 时，说明区域容量相对充足。
+
+\begin{table}[H]
+\centering
+\caption{区域综合承载力与高峰需求校核结果}
+\label{tab:capacity_result}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{区域} & \textbf{静态容量} & \textbf{动态容量} & \textbf{最终容量} & \textbf{峰值需求} & \textbf{饱和度} \\
+\midrule
+16号楼教学区 & 200 & 1681 & 200 & 861 & 4.303 \\
+25号楼教学区 & 245 & 1888 & 245 & 1036 & 4.227 \\
+桃园生活区 & 2798 & 1888 & 1888 & 2444 & 1.295 \\
+杏园生活区 & 1923 & 1354 & 1354 & 1181 & 0.872 \\
+桂苑生活区 & 2640 & 1287 & 1287 & 1278 & 0.993 \\
+东区新教学楼 & 905 & 1888 & 905 & 233 & 0.257 \\
+西区新教学楼 & 1646 & 1888 & 1646 & 312 & 0.189 \\
+商业街 & 102 & 1888 & 102 & 1858 & 18.212 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+由表\ref{tab:capacity_result}可知，16号楼、25号楼和商业街的最终容量主要受静态停车空间约束，说明这些区域不是道路通行能力不足，而是建筑周边可安全停放空间严重不足。桃园生活区则受动态道路容量约束，说明生活区虽然可规划停车空间较多，但高峰接入道路承载能力有限。
+
+\subsubsection{全校承载力与双层饱和度校核}
+
+将各区域最终容量汇总，得到全校电动车安全环境承载力为
+\begin{equation}
+N_{max}=7627\text{ 辆}.
+\end{equation}
+如果仅以模型估计的最差时段高峰运行需求进行校核，最大电动车运行需求为5323辆，则高峰运行饱和度为
+\begin{equation}
+\theta_{peak}=\frac{5323}{7627}=0.698.
+\end{equation}
+这说明在OD模型口径下，高峰时段同时进入道路和停车系统的电动车规模尚未超过全校安全承载力。
+
+但是，高峰运行需求并不等同于校园电动车实际保有量。结合公开资料中学校电动车保有量已超过15000辆的现实背景，若从存量管理角度进行校核，则存量饱和度为
+\begin{equation}
+\theta_{stock}=\frac{15000}{7627}\approx 1.97,
+\end{equation}
+对应安全容量缺口为
+\begin{equation}
+15000-7627=7373\text{ 辆}.
+\end{equation}
+因此，问题二不能简单表述为“全校总量不超载”。更准确的结论是：按高峰运行OD需求校核，全校运行量尚未整体超过安全承载力；但按实际保有量校核，校园电动车存量已经明显超过安全承载力。
+
+\subsubsection{问题二结论与治理建议}
+
+综合静态停车容量、动态道路容量和双层饱和度校核结果，可以得到以下结论：第一，在严格扣除消防通道和必要通行空间后，浙师大金华校区电动车安全环境承载力约为7627辆；第二，按高峰运行需求校核，最差时段运行饱和度为0.698，说明高峰期并非所有存量车辆都会同时进入路网；第三，按15000辆以上实际保有量校核，存量饱和度约为1.97，容量缺口约为7373辆，说明校园电动车存量规模已明显超过安全承载边界；第四，容量矛盾在空间上高度集中，16号楼、25号楼和商业街等核心区域存在严重局部超载。
+
+因此，学校后续治理不宜只采取简单扩建车位的策略，而应采用“存量控制+分区管理+核心区限停+外围分流”的综合治理方式。对16号楼、25号楼和商业街等高压区域，应严格划定停车边界，禁止占用消防通道和建筑出入口；对东区、西区新教学楼等容量相对充足区域，可作为外围缓冲停车空间；对桃园、杏园、桂苑等生活区，应结合道路接入能力控制高峰集中出行；同时，应将7627辆安全承载力作为电动车注册准入、分区限停和后续微公交替代政策的重要依据。
+
+\end{document}

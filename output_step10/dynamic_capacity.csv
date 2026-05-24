@@ -1,0 +1,9 @@
+﻿zone_id,zone_name,N_dynamic,binding_period,morning_C_road,morning_N_dyn,morning_bottleneck,noon_C_road,noon_N_dyn,noon_bottleneck,evening_C_road,evening_N_dyn,evening_bottleneck
+Z1,16幢教学区,1681,evening,1700,1889,N4→N14,1570,1963,N16→N30,1513,1681,N14→N4
+Z2,25幢教学区,1888,morning,1700,1889,N49→N48,1700,2125,N48→N49,1700,1889,N48→N49
+Z3,桃园生活区,1888,morning,1700,1889,N4→N14,1700,2125,N14→N4,1700,1889,N14→N4
+Z4,杏园生活区,1354,evening,1243,1381,N30→N16,1452,1815,N16→N30,1219,1355,N16→N30
+Z5,桂苑生活区,1287,evening,1243,1381,N30→N16,1522,1902,N16→N30,1159,1288,N16→N30
+Z6,东区新教学楼,1888,morning,1700,1889,N4→N14,1700,2125,N16→N30,1700,1889,N14→N4
+Z7,西区新教学楼,1888,morning,1700,1889,N61→N33,1700,2125,N44→N29,1700,1889,N44→N29
+Z8,商业街,1888,morning,1700,1889,N12→N13,1700,2125,N12→N13,1700,1889,N12→N13

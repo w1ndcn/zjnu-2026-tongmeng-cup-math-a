@@ -1,0 +1,255 @@
+% !TEX program = xelatex
+% A题论文正文 — 问题三部分（按“同梦杯”论文格式整理）
+\documentclass[UTF8,zihao=-4,a4paper]{ctexart}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\linespread{1.0}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setlist{nosep,leftmargin=2em}
+\pagestyle{plain}
+
+\ctexset{
+  section={
+    format=\centering\heiti\zihao{4},
+    name={,、},
+    number=\chinese{section},
+    aftername=\quad,
+    beforeskip=1.0ex,
+    afterskip=1.0ex
+  },
+  subsection={
+    format=\raggedright\heiti\zihao{-4},
+    name={,},
+    number=\chinese{section}.\arabic{subsection},
+    aftername=\quad,
+    beforeskip=0.8ex,
+    afterskip=0.6ex
+  },
+  subsubsection={
+    format=\raggedright\heiti\zihao{-4},
+    name={,},
+    number=\chinese{section}.\arabic{subsection}.\arabic{subsubsection},
+    aftername=\quad,
+    beforeskip=0.6ex,
+    afterskip=0.4ex
+  }
+}
+
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{document}
+
+\begin{center}
+{\heiti\zihao{3} 基于最大覆盖选址与潮汐调度的校园微公交路线规划模型}
+\end{center}
+
+\section{问题重述}
+
+为降低师生对私人电动车的依赖，缓解教学区、宿舍区、食堂和商业街之间的高峰出行压力，学校计划投入校园微公交，即校园接驳车。问题三要求基于校园空间拓扑布局，规划合理的接驳车行驶路线和停靠站点，在保证服务覆盖率的同时避免停靠过程对主干道交通造成明显阻碍；同时，还需结合早、中、晚高峰的潮汐客流特征，建立车辆调度模型，确定不同高峰时段的车辆投放量和发车间隔，并在满足乘车需求的前提下降低运营成本。
+
+本问是在问题一和问题二基础上的进一步优化。问题一给出了校园路网阻抗、拥堵瓶颈和冲突风险分布，问题二给出了电动车安全承载力和局部停车超载区域。因此，微公交系统不应被理解为单独解决全部交通问题的工具，而应作为“绿色替代+核心区分流”的补充治理措施，重点服务宿舍区、16号楼、25号楼、食堂和商业街之间的高峰潮汐客流。
+
+\section{问题分析}
+
+\subsection{问题三的分析}
+
+问题三包含三个相互关联的子问题。第一是站点选址问题，即从候选站点中选择若干站点，使其尽可能覆盖高需求建筑，并且站点所在道路宽度、拥堵程度和安全风险满足停靠条件。第二是路线规划问题，即在已选站点之间确定接驳车行驶路线，路线既要覆盖核心需求点，又要尽量避开高饱和、高冲突路段。第三是潮汐调度问题，即根据早、中、晚不同方向的接驳需求，确定车辆投放量、发车间隔和运能配置。
+
+由于问题二表明校园实际电动车保有量已经超过安全承载力，但高峰运行OD需求并未整体超过全校安全容量，因此微公交需求不能只按“全校超载量”计算。若仅在 $D_{bike}>N_{max}$ 时才产生接驳需求，会导致高峰运行需求低于承载力时微公交需求为零，这与题目中鼓励绿色出行的目标不符。因此，本文将微公交客流分为基础绿色替代需求和超载治理需求两部分：前者表示主动吸引部分电动车用户转向接驳车，后者表示当高峰电动车需求超过承载力时对超载部分进行额外转移。
+
+\section{模型假设}
+
+为建立可计算的微公交选址、路线和调度模型，作如下假设：
+\begin{enumerate}
+    \item 接驳车主要服务校园内部短距离高峰出行，不考虑校外长距离客流；
+    \item 候选站点设置在宿舍区、核心教学楼、食堂或商业街周边，且停靠位置应满足道路宽度和安全条件；
+    \item 接驳车运行速度受道路拥堵影响，可用问题一中的BPR阻抗思想修正路段运行时间；
+    \item 微公交对私人电动车的替代需求由基础替代需求和超载治理需求共同决定；
+    \item 接驳车按固定线路循环或往返运行，同一时段内车辆均匀发车，乘客平均等待时间约为发车间隔的一半；
+    \item 调度目标是在满足客流需求和最大发车间隔约束下，使运营成本、乘客等待成本和运能浪费成本之和最小。
+\end{enumerate}
+
+\section{符号说明}
+
+\begin{table}[H]
+\centering
+\caption{问题三主要符号说明}
+\label{tab:symbols_q3}
+\begin{tabular}{ccc}
+\toprule
+\textbf{符号} & \textbf{说明} & \textbf{单位} \\
+\midrule
+$I$ & 需求点集合 & -- \\
+$J$ & 候选站点集合 & -- \\
+$x_j$ & 候选站点 $j$ 是否被选中 & 0--1 \\
+$y_i$ & 需求点 $i$ 是否被覆盖 & 0--1 \\
+$a_i$ & 需求点 $i$ 的需求权重 & 人次 \\
+$r_{ij}$ & 站点 $j$ 是否覆盖需求点 $i$ & 0--1 \\
+$P_j$ & 候选站点 $j$ 的适宜性得分 & -- \\
+$D_s^t$ & 时段 $t$ 的接驳需求 & 人次 \\
+$D_{bike}^t$ & 时段 $t$ 的电动车运行需求 & 人次 \\
+$N_{max}$ & 校园电动车安全承载力 & 辆 \\
+$n_t$ & 时段 $t$ 投放接驳车辆数 & 辆 \\
+$K$ & 单车载客量 & 人/车 \\
+$\tau_r$ & 推荐线路单程运行时间 & min \\
+$h_t$ & 时段 $t$ 发车间隔 & min \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{模型的建立与求解}
+
+\subsection{问题三模型的建立与求解}
+
+\subsubsection{候选站点构造与适宜性评价}
+
+根据校园空间结构和问题二中识别出的高压区域，选取宿舍区、16号楼、25号楼、食堂和商业街周边作为候选站点。设候选站点集合为 $J$，需求点集合为 $I$。候选站点是否适宜停靠，需要同时考虑覆盖能力、道路宽度、拥堵程度和冲突风险。站点 $j$ 对需求点 $i$ 的覆盖关系定义为
+\begin{equation}
+r_{ij}=\begin{cases}
+1, & d_{ij}\le R_0,\\
+0, & d_{ij}>R_0,
+\end{cases}
+\end{equation}
+其中 $d_{ij}$ 为需求点 $i$ 到候选站点 $j$ 的步行距离，$R_0$ 为最大可接受步行距离。
+
+进一步构造候选站点适宜性得分：
+\begin{equation}
+P_j=\alpha_1 COV_j+\alpha_2 W_j-\alpha_3 VC_j-\alpha_4 RISK_j,
+\end{equation}
+其中 $COV_j$ 表示站点覆盖需求强度，$W_j$ 表示周边道路宽度条件，$VC_j$ 表示周边道路饱和度，$RISK_j$ 表示周边冲突风险。适宜性得分越高，说明该站点既能覆盖更多需求，又不容易因停靠造成额外拥堵或安全风险。
+
+\subsubsection{最大覆盖站点选址模型}
+
+在候选站点适宜性评价基础上，建立最大覆盖选址模型。设 $x_j$ 表示候选站点 $j$ 是否被选中，$y_i$ 表示需求点 $i$ 是否被覆盖，$p$ 为可建设站点数量，则模型为
+\begin{equation}
+\begin{aligned}
+\max \quad & \sum_{i\in I} a_i y_i,\\
+\text{s.t.}\quad & y_i\le \sum_{j\in J} r_{ij}x_j,\quad \forall i\in I,\\
+& \sum_{j\in J}x_j=p,\\
+& x_j\in\{0,1\},\quad y_i\in\{0,1\}.
+\end{aligned}
+\end{equation}
+其中 $a_i$ 为需求点权重，可由建筑容量、高峰OD需求和停车压力综合确定。模型目标是在给定站点数量下最大化被覆盖需求。计算结果表明，选取桃园站、16号楼站、25号楼站、杏园站和桂苑站能够较好覆盖宿舍区与核心教学区之间的潮汐客流，并兼顾食堂和生活区方向的出行需求。
+
+\subsubsection{基于BPR阻抗的线路规划模型}
+
+站点确定后，需要在校园路网中规划接驳车运行线路。若仅按距离最短选择路线，可能经过高饱和或高冲突路段，导致接驳车本身加剧拥堵。因此，本文沿用问题一中的BPR阻抗思想，将路段长度和拥堵状态共同转化为接驳车运行时间：
+\begin{equation}
+t_e^{bus}=\frac{l_e}{v_{bus}}\left[1+\alpha\left(\frac{X_e}{C_e}\right)^\beta\right],
+\end{equation}
+其中 $v_{bus}$ 为接驳车自由流速度，$X_e/C_e$ 为路段饱和度，$\alpha=0.15$，$\beta=4.0$。在此基础上，以 $t_e^{bus}$ 为边权进行最短路搜索，得到候选线路。
+
+为综合比较不同线路，构造线路广义成本函数：
+\begin{equation}
+G_r=\omega_1\frac{L_r}{L_{max}}+\omega_2\frac{T_r}{T_{max}}+\omega_3\overline{VC}_r+\omega_4\overline{RISK}_r-\omega_5\frac{Q_r}{Q_{max}},
+\end{equation}
+其中 $L_r$ 为线路长度，$T_r$ 为线路运行时间，$\overline{VC}_r$ 为线路平均饱和度，$\overline{RISK}_r$ 为线路平均冲突风险，$Q_r$ 为线路覆盖需求。广义成本越小，线路综合表现越优。
+
+候选线路评价结果如表\ref{tab:route_eval}所示。R1教学潮汐线长度和运行时间较短，广义成本最低，因此选为推荐线路。
+
+\begin{table}[H]
+\centering
+\caption{候选接驳线路评价结果}
+\label{tab:route_eval}
+\begin{tabular}{ccccccc}
+\toprule
+\textbf{线路} & \textbf{类型} & \textbf{长度/m} & \textbf{时间/min} & \textbf{平均V/C} & \textbf{覆盖需求} & \textbf{广义成本} \\
+\midrule
+R1 & 教学潮汐线 & 1243 & 5.8 & 0.173 & 51,300 & 0.6786 \\
+R2 & 校园环线 & 1661 & 7.6 & 0.165 & 51,300 & 0.7689 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+推荐线路为
+\begin{equation}
+\text{桃园站}\rightarrow\text{16号楼站}\rightarrow\text{25号楼站}\rightarrow\text{杏园站}\rightarrow\text{桂苑站}.
+\end{equation}
+该线路能够连接主要宿舍区和核心教学区，适合承担早高峰宿舍到教学楼、午高峰教学楼到食堂及生活区、晚高峰教学楼返回宿舍的潮汐出行需求。
+
+\subsubsection{接驳需求识别模型}
+
+根据问题二结果，校园电动车安全环境承载力为 $N_{max}=7627$ 辆。虽然最差时段高峰运行需求5323辆未超过该容量，但实际电动车保有量已超过15000辆，说明校园存在明显存量超载和局部空间错配。因此，微公交需求不能只由全校超载量决定。本文将时段 $t$ 的接驳需求定义为
+\begin{equation}
+D_s^t=\eta_{base}D_{bike}^t+\eta_{over}\max(0,D_{bike}^t-N_{max}),
+\end{equation}
+其中 $\eta_{base}$ 为基础绿色替代率，$\eta_{over}$ 为超载治理转移率。基准情景取
+\begin{equation}
+\eta_{base}=10\%,\qquad \eta_{over}=50\%.
+\end{equation}
+由于各时段模型电动车运行需求均小于 $N_{max}$，超载治理项为0，接驳需求主要来自基础绿色替代需求。由此得到早高峰、午高峰和晚高峰接驳需求分别为415、439和532人次。
+
+\subsubsection{潮汐客流调度模型}
+
+接驳车调度需要在满足客流需求的同时控制运营成本。设时段 $t$ 持续时间为 $H_t$，推荐线路单程运行时间为 $\tau_r$，单车容量为 $K$，投放车辆数为 $n_t$。则发车间隔为
+\begin{equation}
+h_t=\frac{\tau_r}{n_t},
+\end{equation}
+时段总运能为
+\begin{equation}
+Q_t(n_t)=n_tK\frac{H_t}{\tau_r}.
+\end{equation}
+
+综合考虑车辆运营成本、乘客等待成本和运能浪费成本，建立调度成本函数：
+\begin{equation}
+Z(n_t)=C_Vn_tH_t+C_WD_s^t\frac{h_t}{2}+C_O\max(0,Q_t(n_t)-D_s^t),
+\end{equation}
+约束条件为
+\begin{equation}
+Q_t(n_t)\ge D_s^t,\qquad h_t\le H_{max},\qquad n_t\in \mathbb{Z}^{+}.
+\end{equation}
+其中第一项为车辆运营成本，第二项为乘客平均等待成本，第三项为运能闲置惩罚。通过枚举可行车辆数，选择总成本最小的 $n_t$ 作为推荐投放量。
+
+\begin{table}[H]
+\centering
+\caption{基准情景下接驳车调度结果}
+\label{tab:dispatch_result}
+\begin{tabular}{cccccccc}
+\toprule
+\textbf{时段} & \textbf{主方向} & \textbf{需求/人次} & \textbf{持续/min} & \textbf{单程/min} & \textbf{车辆数} & \textbf{间隔/min} & \textbf{满载率} \\
+\midrule
+早高峰 & 宿舍区$\rightarrow$教学区 & 415 & 45 & 5.8 & 3 & 1.9 & 0.71 \\
+午高峰 & 教学区$\rightarrow$食堂/商业街 & 439 & 50 & 5.8 & 3 & 1.9 & 0.68 \\
+晚高峰 & 教学区$\rightarrow$宿舍/食堂 & 532 & 40 & 5.8 & 4 & 1.4 & 0.77 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+由表\ref{tab:dispatch_result}可知，基准10\%替代率下，早高峰和午高峰各需投放3辆接驳车，晚高峰需投放4辆接驳车。各时段发车间隔均小于2分钟，平均等待时间约为0.7--1.0分钟，能够满足高峰期连续接驳需求。
+
+\subsubsection{接驳效果评价与问题三结论}
+
+将接驳车替代的电动车流量从原高峰OD中扣除，并重新进行交通分配，可得到微公交实施后的路网改善效果，如表\ref{tab:effect_result}所示。
+
+\begin{table}[H]
+\centering
+\caption{微公交接驳后的交通改善效果}
+\label{tab:effect_result}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{时段} & \textbf{电动车削减率} & \textbf{TTT优化前} & \textbf{TTT优化后} & \textbf{TTT改善} & \textbf{冲突风险改善} \\
+\midrule
+早高峰 & 10.0\% & 2,358,474 & 2,296,839 & 2.6\% & 6.6\% \\
+午高峰 & 10.0\% & 2,468,005 & 2,403,327 & 2.6\% & 6.9\% \\
+晚高峰 & 10.0\% & 3,085,554 & 2,996,610 & 2.9\% & 7.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+结果表明，微公交在基准情景下可使路网总行程时间下降约2.6\%--2.9\%，人车冲突风险下降约6.6\%--7.0\%。改善幅度不宜被夸大，因为基准替代率仅为10\%，且接驳车本身也会占用一定道路资源。但该结果说明微公交能够有效减少私人电动车直达教学区、食堂和商业街的需求，对缓解核心区停车压力和降低人车混行冲突具有正向作用。
+
+综上，问题三推荐采用以桃园站、16号楼站、25号楼站、杏园站、桂苑站为核心的教学潮汐接驳线。基准情景下，早高峰和午高峰各投放3辆车，晚高峰投放4辆车即可实现连续接驳。微公交的主要功能不是一次性吸收全部15000辆以上存量电动车，而是替代高峰运行流量、分流核心区交通压力，并与问题一的人车隔离、分时限行以及问题二的核心区限停和总量控制共同构成校园微交通综合治理方案。
+
+\end{document}

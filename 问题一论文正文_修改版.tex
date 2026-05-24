@@ -1,0 +1,232 @@
+% !TEX program = xelatex
+% A题论文正文 — 问题一部分（按“同梦杯”论文格式整理）
+\documentclass[UTF8,zihao=-4,a4paper]{ctexart}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\linespread{1.0}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setlist{nosep,leftmargin=2em}
+\pagestyle{plain}
+
+\ctexset{
+  section={
+    format=\centering\heiti\zihao{4},
+    name={,、},
+    number=\chinese{section},
+    aftername=\quad,
+    beforeskip=1.0ex,
+    afterskip=1.0ex
+  },
+  subsection={
+    format=\raggedright\heiti\zihao{-4},
+    name={,},
+    number=\chinese{section}.\arabic{subsection},
+    aftername=\quad,
+    beforeskip=0.8ex,
+    afterskip=0.6ex
+  },
+  subsubsection={
+    format=\raggedright\heiti\zihao{-4},
+    name={,},
+    number=\chinese{section}.\arabic{subsection}.\arabic{subsubsection},
+    aftername=\quad,
+    beforeskip=0.6ex,
+    afterskip=0.4ex
+  }
+}
+
+\captionsetup{font=small,labelfont=bf}
+\renewcommand{\arraystretch}{1.15}
+
+\begin{document}
+
+\begin{center}
+{\heiti\zihao{3} 基于用户均衡分配与冲突风险评价的校园微交通优化模型}
+\end{center}
+
+\section{问题重述}
+
+随着校园办学规模扩大，教学区、宿舍区、食堂和商业街之间的短距离出行需求明显增加。早、中、晚高峰期间，步行、电动车、机动车等多类交通方式在校园主干道上交织运行，容易造成局部拥堵和人车混行安全隐患。问题一要求基于金华校区道路空间结构和高峰期出行规律，建立交通流分配与分流优化模型，识别核心拥堵路段和高风险路段，并设计包含单行线、分时限行、人车隔离等措施的交通组织方案，重点给出16号楼、25号楼至餐厅和宿舍方向的分流思路，最后量化评价方案实施效果。
+
+\section{问题分析}
+
+\subsection{问题一的分析}
+
+问题一的关键不只是寻找最短路径，而是要同时描述“多类交通方式混行”和“校园安全优先”的特点。校园道路中，步行、电动车和机动车速度、占用空间及冲突风险不同，若仅按距离分配交通流，会低估高峰期主干道拥堵和人车冲突。因此，本文先将校园道路抽象为有向加权图，再根据宿舍、教学楼、食堂和商业街的空间关系构造高峰期OD需求，进而采用BPR阻抗函数刻画路段拥堵效应，并通过用户均衡模型模拟师生在道路网络中的路径选择。
+
+在评价指标上，题目要求量化通行效率提升，但校园交通治理不能只看总行程时间。单行线和分时限行可能带来局部绕行，使总行程时间略有增加；但如果能够显著降低人车交织冲突，仍然具有治理价值。因此，本文采用总行程时间（TTT）、道路饱和度（V/C）和人车冲突风险指标 $S$ 共同评价方案效果，并将综合优化方案定位为安全优先型交通组织方案。
+
+\section{模型假设}
+
+为保证模型可计算且符合校园交通实际，作如下假设：
+\begin{enumerate}
+    \item 校园道路、建筑出入口和主要交叉口可抽象为有向加权图，路段长度和宽度在研究时段内保持不变；
+    \item 高峰期OD需求主要由宿舍、教学楼、食堂和商业街之间的潮汐出行产生，可用建筑容量和网络距离估计；
+    \item 步行、电动车和机动车在同一路段上存在混行干扰，可通过等效PCU系数折算为统一流量；
+    \item 出行者倾向于选择当前阻抗较小的路径，整体交通分配可用用户均衡思想近似；
+    \item 人车隔离措施可显著降低不同交通方式之间的空间交织风险，但可能带来少量绕行成本。
+\end{enumerate}
+
+\section{符号说明}
+
+\begin{table}[H]
+\centering
+\caption{问题一主要符号说明}
+\label{tab:symbols_q1}
+\begin{tabular}{ccc}
+\toprule
+\textbf{符号} & \textbf{说明} & \textbf{单位} \\
+\midrule
+$G=(V,E)$ & 校园有向道路网络 & -- \\
+$l_e$ & 路段 $e$ 的长度 & m \\
+$w_e$ & 路段 $e$ 的宽度 & m \\
+$C_e$ & 路段 $e$ 的通行能力 & pcu/h \\
+$t_e^0$ & 路段自由流通行时间 & s \\
+$X_e^h$ & 时段 $h$ 路段 $e$ 的等效PCU流量 & pcu/h \\
+$q_{ij}^{m,h}$ & 时段 $h$ 中方式 $m$ 的OD需求 & 人次 \\
+$TTT$ & 全路网总行程时间 & 人$\cdot$s \\
+$S$ & 全路网人车冲突风险指标 & -- \\
+$\mu_e^h$ & 路段饱和度，即V/C & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{模型的建立与求解}
+
+\subsection{问题一模型的建立与求解}
+
+\subsubsection{校园路网与OD需求估计}
+
+将校园道路系统抽象为有向加权图
+\begin{equation}
+G=(V,E),
+\end{equation}
+其中 $V$ 为节点集合，包括教学楼、宿舍区、食堂、商业街及道路交叉口；$E$ 为有向路段集合。每条路段 $e\in E$ 具有长度 $l_e$、宽度 $w_e$、通行能力 $C_e$ 和自由流速度 $v_e^0$ 等属性。本文采用的扩展版校园路网共包含84个节点、310条有向边，能够覆盖宿舍区、教学区、食堂、商业街和主要交叉口之间的通行关系。
+
+由于缺少逐OD实测数据，采用引力模型估计高峰期出行分布。时段 $h$ 下，从建筑 $i$ 到建筑 $j$ 的出行需求为
+\begin{equation}
+T_{ij}^{h}=O_i^h\cdot \frac{D_j(d_{ij})^{-\gamma}}{\sum_kD_k(d_{ik})^{-\gamma}},
+\end{equation}
+其中 $O_i^h$ 为出发建筑在时段 $h$ 的出行产生量，$D_j$ 为到达建筑吸引力，$d_{ij}$ 为网络最短路径距离，$\gamma=1.5$ 为距离衰减系数。在得到OD总量后，按出行距离划分交通方式，短距离以步行为主，中长距离电动车占比提高，远距离保留少量机动车需求。三时段OD估计结果见表\ref{tab:od_summary}。
+
+\begin{table}[H]
+\centering
+\caption{三时段OD需求估计结果}
+\label{tab:od_summary}
+\begin{tabular}{cccc}
+\toprule
+\textbf{时段} & \textbf{主要方向} & \textbf{OD总量/人次} & \textbf{电动车人次} \\
+\midrule
+早高峰 & 宿舍区 $\rightarrow$ 教学区 & 10,505 & 4,146 \\
+午高峰 & 教学区 $\rightarrow$ 食堂/商业街 & 12,000 & 4,393 \\
+晚高峰 & 教学区 $\rightarrow$ 宿舍/食堂 & 13,500 & 5,323 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{多方式用户均衡分配模型}
+
+为统一刻画步行、电动车和机动车的混行影响，将三类方式转换为等效PCU流量：
+\begin{equation}
+X_e^h=\sum_{m\in M}\xi_m x_e^{m,h},\qquad M=\{p,b,c\},
+\end{equation}
+其中 $p,b,c$ 分别表示步行、电动车和机动车，$x_e^{m,h}$ 为方式 $m$ 在路段 $e$、时段 $h$ 的流量，$\xi_m$ 为等效换算系数。路段阻抗采用BPR函数：
+\begin{equation}
+t_e^h=t_e^0\left[1+\alpha\left(\frac{X_e^h}{C_e}\right)^\beta\right],
+\end{equation}
+其中 $t_e^0=l_e/v_e^0$，$\alpha=0.15$，$\beta=4.0$。该函数能够反映当路段流量接近或超过通行能力时，通行时间非线性上升的拥堵特征。
+
+用户均衡假设为：同一OD对、同一交通方式下，被选择路径的出行阻抗相等且不大于未被选择路径。对应的Beckmann等价规划为
+\begin{equation}
+\begin{aligned}
+\min \quad & Z=\sum_{e\in E}\int_0^{X_e^h}t_e(w)\,dw,\\
+\text{s.t.}\quad & \sum_{k\in K_{ij}} f_{k,ij}^{m,h}=q_{ij}^{m,h},\quad \forall(i,j),m,h,\\
+& x_e^{m,h}=\sum_{(i,j)}\sum_{k\in K_{ij}}\delta_{e,k}^{ij}f_{k,ij}^{m,h},\quad \forall e,m,h,\\
+& f_{k,ij}^{m,h}\ge 0.
+\end{aligned}
+\end{equation}
+本文采用Frank--Wolfe算法求解。每次迭代先根据当前路段阻抗进行全有全无分配，得到下降方向，再通过一维线搜索确定步长，直至满足收敛条件。
+
+\subsubsection{评价指标与现状结果}
+
+模型评价指标包括总行程时间、冲突风险和道路饱和度。总行程时间定义为
+\begin{equation}
+TTT=\sum_{h\in\mathcal{H}}\sum_{e\in E}\sum_{m\in M}x_e^{m,h}t_e^h.
+\end{equation}
+人车冲突风险定义为不同方式流量乘积的加权和：
+\begin{equation}
+S_e^h=\omega_{pb}x_e^{p,h}x_e^{b,h}+\omega_{pc}x_e^{p,h}x_e^{c,h}+\omega_{bc}x_e^{b,h}x_e^{c,h},
+\end{equation}
+其中 $\omega_{pb}=0.5$、$\omega_{pc}=1.5$、$\omega_{bc}=0.8$，全路网风险为 $S=\sum_{h,e}S_e^h$。道路饱和度为 $\mu_e^h=X_e^h/C_e$，用于识别瓶颈路段。
+
+在不采取治理措施的基准情景下，对三个时段分别进行用户均衡分配，结果如表\ref{tab:baseline}所示。晚高峰的总行程时间和冲突风险均为最高，说明晚高峰教学区至宿舍区、食堂区的多方向流线叠加，是校园混行冲突最突出的时段。
+
+\begin{table}[H]
+\centering
+\caption{现状情景三时段UE分配结果}
+\label{tab:baseline}
+\begin{tabular}{cccc}
+\toprule
+\textbf{时段} & \textbf{TTT} & \textbf{冲突风险 $S$} & \textbf{核心瓶颈路段} \\
+\midrule
+早高峰 & 2,358,474 & 43,136,007 & $N30\rightarrow N16$，V/C=1.710 \\
+午高峰 & 2,468,005 & 52,045,085 & $N16\rightarrow N30$，V/C=1.315 \\
+晚高峰 & 3,085,554 & 68,083,354 & $N14\rightarrow N4$，V/C=1.068 \\
+\midrule
+合计 & 7,912,033 & 163,264,447 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{交通组织方案设计与结果比较}
+
+针对现状瓶颈和冲突风险分布，设计三类交通组织方案：方案A为早高峰关键路段单行线，重点缓解宿舍区至教学区方向的对向交织；方案B为午高峰食堂周边分时限行，降低餐饮区入口处的人车冲突；方案C为综合优化方案，将方案A、方案B与高风险路段人车隔离相结合，对冲突风险最高的主干道实施物理隔离或明确通行边界。
+
+三类方案的评价结果见表\ref{tab:scenario_compare}。其中 $\Delta TTT$ 为相对基准的总行程时间改善率，负值表示总行程时间增加；$\Delta S$ 为冲突风险降低率，正值表示安全水平改善。
+
+\begin{table}[H]
+\centering
+\caption{三类治理方案效果对比}
+\label{tab:scenario_compare}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{方案} & \textbf{TTT} & \textbf{$\Delta TTT$} & \textbf{冲突风险 $S$} & \textbf{$\Delta S$} \\
+\midrule
+基准现状 & 7,912,033 & --- & 163,264,447 & --- \\
+方案A：单行线 & 7,985,893 & $-0.9\%$ & 155,217,034 & $+4.9\%$ \\
+方案B：分时限行 & 8,004,625 & $-1.2\%$ & 146,938,247 & $+10.0\%$ \\
+\textbf{方案C：综合优化} & 8,078,485 & $-2.1\%$ & \textbf{127,328,957} & \textbf{$+22.0\%$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+结果表明，方案C的人车冲突风险下降幅度最大，达到22.0\%，明显优于单独实施单行线或分时限行。其原因在于，单行组织主要减少对向冲突，分时限行主要降低食堂区短时冲突强度，而人车隔离则直接减少不同交通方式的空间交织。三者叠加后能够同时作用于“流向组织”和“空间隔离”两个层面，因此安全改善最明显。
+
+需要注意的是，方案C的TTT相比现状增加2.1\%，说明该方案并不能表述为“通行效率全面提升”。总行程时间增加主要来自单行线和限行带来的局部绕行成本。但从校园交通治理目标看，学校场景下安全优先级高于少量时间损失，因此该方案更适合定义为“安全优先型综合治理方案”。换言之，方案C以约2.1\%的效率代价换取22.0\%的冲突风险下降，具有较高的安全收益。
+
+\subsubsection{重点区域分流方案}
+
+在推荐方案C基础上，进一步对16号楼、25号楼及其通往宿舍区、食堂区的重点OD进行路径分流。对每个重点OD生成若干候选路径，并以通行时间、路径距离和道路安全性构造广义费用：
+\begin{equation}
+g_{ij}^k=\theta_t T_{ij}^k+\theta_d\frac{D_{ij}^k}{1000}+\theta_r R_{ij}^k,
+\end{equation}
+其中 $T_{ij}^k$ 为路径时间，$D_{ij}^k$ 为路径距离，$R_{ij}^k$ 为风险项。路径选择比例采用Logit模型：
+\begin{equation}
+p_k=\frac{(g_{ij}^k)^{-\rho}}{\sum_s(g_{ij}^s)^{-\rho}},\qquad \rho=2.0.
+\end{equation}
+据此形成以下分流策略：16号楼出发流量优先利用西侧和中部道路分担往桃园、杏园方向压力；25号楼出发流量优先利用东侧和南侧道路分散往桂苑、初阳方向压力；午高峰教学楼至食堂方向采用单向组织，减少对向交织；晚高峰教学区至宿舍区和餐饮区流线尽量分离，避免在餐厅入口和宿舍区入口形成多点冲突。
+
+综上，问题一可得到如下结论：在校园主干道人车混行条件下，单纯追求最短路径会导致关键路段流量集中和冲突风险升高。基于BPR阻抗和用户均衡分配的模型能够识别不同时段的拥堵瓶颈和风险路段。三类方案比较表明，综合优化方案C虽然使总行程时间增加2.1\%，但可使冲突风险下降22.0\%，因此应作为问题一推荐方案。该方案的本质不是提高全路网通行速度，而是在可接受的绕行代价下显著降低人车混行风险，为后续电动车容量治理和微公交接驳系统提供安全基础。
+
+\end{document}
