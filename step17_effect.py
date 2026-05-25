@@ -148,17 +148,14 @@ for _, row in capacity_df.iterrows():
 # ═══════════════════ 4. TTT 与 S 重新计算（接驳后重跑 UE） ═══════════════════
 print("\n重新运行 UE 评估接驳车对路网的影响（每时段独立重算）:")
 
-# 加载 step4 的 FW/network 函数以备调用，使用独立命名空间，避免覆盖本脚本 OUTPUT_DIR 等全局变量
+# 加载 step4 的 FW/network 函数以备调用
 import sys, math
 _built = False
-_fw_ns = {}
 try:
     _step4_src = open(os.path.join(os.path.dirname(__file__), "step4_scenarios.py")).read().split("# ═══════════════════ 情景方案")[0]
-    exec(compile(_step4_src, "step4_scenarios.py", 'exec'), _fw_ns)
-    build_adj_fn = _fw_ns['build_adj']
-    frank_wolfe_fn = _fw_ns['frank_wolfe']
-    calc_ttt_fn = _fw_ns['calc_ttt']
-    calc_conflict_fn = _fw_ns['calc_conflict']
+    _saved_output_dir = OUTPUT_DIR  # 防止 exec 中 step4 的 OUTPUT_DIR 覆盖
+    exec(compile(_step4_src, "step4_scenarios.py", 'exec'))
+    OUTPUT_DIR = _saved_output_dir
     _built = True
 except Exception as _e:
     print(f"  (无法加载 step4, 回退比例估算: {_e})")
@@ -192,10 +189,10 @@ for p in PERIODS:
                         if v > 0.01:
                             od_new[(src, dst, mode)] = v
 
-            adj, eid_map, eattr = build_adj_fn(G)
-            x_mode, x_eq = frank_wolfe_fn(od_new, adj, eattr, eid_map, max_iter=20)
-            ttt_new = calc_ttt_fn(x_mode, x_eq, eattr)
-            s_new = calc_conflict_fn(x_mode, eattr)
+            adj, eid_map, eattr = build_adj(G)
+            x_mode, x_eq = frank_wolfe(od_new, adj, eattr, eid_map, max_iter=20)
+            ttt_new = calc_ttt(x_mode, x_eq, eattr)
+            s_new, _ = calc_conflict(x_mode, eattr)
         except Exception:
             ttt_new = ttt_old * (1 - ebike_red * 0.25)
             s_new = s_old * (1 - ebike_red * 0.35)

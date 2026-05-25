@@ -49,8 +49,13 @@ capacity_df = pd.read_csv(os.path.join(STEP11_DIR, "final_capacity.csv"))
 N_max = sum(int(r['N_opt']) for _, r in capacity_df.iterrows())
 print(f"校园最大容量 N_max = {N_max} 辆")
 
-# 各时段 e-bike 需求
-D_bike = {'morning': 4146, 'noon': 4393, 'evening': 5323}
+# 各时段 e-bike 需求（从 step2 OD 读取）
+STEP2_DIR = "output_step2"
+D_bike = {}
+for p in ['morning', 'noon', 'evening']:
+    df = pd.read_csv(os.path.join(STEP2_DIR, f'od_{p}_b.csv'), index_col=0)
+    D_bike[p] = df.values.sum()
+print(f"D_bike: {D_bike}")
 
 # 两部分需求: 基础替代(绿色出行) + 超载治理
 ETA_BASE = 0.10   # 基础替代率: 主动吸引10%电动车用户转移
@@ -63,7 +68,7 @@ D_over_bus = {p: ETA_OVER * D_over_raw[p] for p in D_bike}
 print("\n各时段电动车需求与接驳需求:")
 for p in ['morning', 'noon', 'evening']:
     D_total = D_base[p] + D_over_bus[p]
-    print(f"  {PERIOD_LABEL[p]:4s}: D_bike={D_bike[p]:4d}, "
+    print(f"  {PERIOD_LABEL[p]:4s}: D_bike={D_bike[p]:.0f}, "
           f"基础替代={D_base[p]:.0f}, 超载转移={D_over_bus[p]:.0f}, "
           f"总接驳需求={D_total:.0f} 人次")
 
@@ -93,13 +98,10 @@ for _, r in df_demand.iterrows():
 
 # ═══════════════════ 3. 加载线路数据 ═══════════════════
 route_df = pd.read_csv(os.path.join(STEP15_DIR, "candidate_routes.csv"))
-route_eval = pd.read_csv(os.path.join(STEP15_DIR, "route_evaluation.csv"))
-route_eval['G_cost_num'] = route_eval['G_cost'].astype(float)
-best_route_id = route_eval.loc[route_eval['G_cost_num'].idxmin(), 'route_id']
-best_route = route_df[route_df['route_id'] == best_route_id].iloc[0]
-best_route_eval = route_eval[route_eval['route_id'] == best_route_id].iloc[0]
+# 取最优线路 R1
+best_route = route_df[route_df['route_id'] == 'R1'].iloc[0]
 tau_r = float(best_route['travel_time_min'])   # 单程时间 (min)
-print(f"\n最优线路: {best_route['route_name']} ({best_route_id}, G={float(best_route_eval['G_cost_num']):.4f})")
+print(f"\n最优线路: {best_route['route_name']}")
 print(f"  单程时间 τ_r = {tau_r:.1f} min")
 
 # ═══════════════════ 4. 调度优化计算 ═══════════════════

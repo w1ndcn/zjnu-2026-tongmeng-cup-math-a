@@ -207,7 +207,7 @@ T_max = max(times) if max(times) > 0 else 1
 V_max = max(vcs_avg) if max(vcs_avg) > 0 else 1
 S_max = max(risks_avg) if max(risks_avg) > 0 else 1
 
-# 覆盖客流: 读取站点-建筑覆盖矩阵，对线路覆盖建筑去重后计算需求
+# 覆盖客流: 用途经站点覆盖的建筑需求之和
 BUILDING_CAPACITY = {
     'T_16': 3000, 'T_25': 2000,
     'T_1': 1000, 'T_2': 1000, 'T_3': 1000, 'T_4': 1000, 'T_5': 1000,
@@ -215,21 +215,12 @@ BUILDING_CAPACITY = {
     'TYGY': 13000, 'XYGY': 7000, 'CYGY': 3000, 'GYGY': 5000,
     'TYST': 1100, 'XYST': 1100, 'GYST': 1100, 'SYJ': 5000,
 }
-coverage_df = pd.read_csv(os.path.join(STEP14_DIR, "stop_coverage.csv"))
-P_max = sum(BUILDING_CAPACITY.get(str(b), 500) for b in coverage_df['building'].drop_duplicates())
-P_max = P_max if P_max > 0 else 1
-
-def route_covered_demand(stop_seq):
-    """计算线路经过站点覆盖的建筑需求，建筑去重，避免重复计数。"""
-    covered_buildings = set()
-    for sid in set(stop_seq):
-        sub = coverage_df[(coverage_df['stop_id'] == sid) & (coverage_df['covered'] == 1)]
-        covered_buildings.update(str(b) for b in sub['building'].tolist())
-    demand = sum(BUILDING_CAPACITY.get(b, 500) for b in covered_buildings)
-    return demand, covered_buildings
+sel_stops_info = dict(zip(sel_df['stop_id'], sel_df['covered_demand']))
 
 for i, route in enumerate(CANDIDATE_ROUTES):
-    covered, covered_buildings = route_covered_demand(route['stop_sequence'])
+    # 覆盖客流 = 途经站点的覆盖需求之和（去重）
+    unique_stops = set(route['stop_sequence'])
+    covered = sum(float(sel_stops_info.get(s, '0')) for s in unique_stops)
 
     L = float(rows[i]['length_m'])
     T = float(rows[i]['travel_time_min'])
@@ -237,6 +228,7 @@ for i, route in enumerate(CANDIDATE_ROUTES):
     S = float(rows[i]['avg_risk'])
     P = covered
 
+    P_max = sum(BUILDING_CAPACITY.values())
     G_cost = (ALPHA_L * L / L_max
               + ALPHA_T * T / T_max
               + ALPHA_V * V / V_max
@@ -251,7 +243,6 @@ for i, route in enumerate(CANDIDATE_ROUTES):
         'avg_vc': f"{V:.3f}",
         'avg_risk': f"{S:.0f}",
         'covered_demand': f"{P:.0f}",
-        'covered_buildings': '|'.join(sorted(covered_buildings)),
         'G_cost': f"{G_cost:.4f}",
     })
 

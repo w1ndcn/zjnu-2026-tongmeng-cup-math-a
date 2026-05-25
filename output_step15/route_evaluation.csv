@@ -1,3 +1,3 @@
-﻿route_id,route_name,length_m,time_min,avg_vc,avg_risk,covered_demand,covered_buildings,G_cost
-R1,教学潮汐线,1243,5.8,0.173,1189226,51300,CYGY|GYGY|GYST|SYJ|TYGY|TYST|T_1|T_10|T_16|T_2|T_25|T_3|T_4|T_5|T_6|T_7|T_8|T_9|XYGY|XYST,0.6786
-R2,校园环线,1661,7.6,0.165,1059476,51300,CYGY|GYGY|GYST|SYJ|TYGY|TYST|T_1|T_10|T_16|T_2|T_25|T_3|T_4|T_5|T_6|T_7|T_8|T_9|XYGY|XYST,0.7689
+﻿route_id,route_name,length_m,time_min,avg_vc,avg_risk,covered_demand,G_cost
+R1,教学潮汐线,1243,5.8,0.178,204735,137300,0.5110
+R2,校园环线,1661,7.6,0.172,184615,137300,0.6060
